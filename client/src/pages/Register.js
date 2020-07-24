@@ -1,5 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import {connect} from 'react-redux'
+import { register } from '../store/actions/authActions'
+// import {register} from '../store/actions/authActions'
 
 class Register extends React.Component {
     state = {
@@ -9,6 +12,14 @@ class Register extends React.Component {
         confirmPassword: '',
         error: {}
     }
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if(JSON.stringify(nextProps.auth.error) !== JSON.stringify(prevState.error)) {
+            return {
+                error: nextProps.auth.error
+            }
+        }
+        return null
+    }
 
     changeHandler = event => {
         this.setState({
@@ -17,8 +28,9 @@ class Register extends React.Component {
     }
     submitHandler = event => {
         event.preventDefault();
+        let {name, email, password, confirmPassword} = this.state
+        this.props.register({name, email, password, confirmPassword}, this.props.history)
     }
-
     render() {
         let {name, email, password, confirmPassword, error} = this.state
         return (
@@ -30,49 +42,61 @@ class Register extends React.Component {
                             <label htmlFor="name">Name: </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={error.name ? 'form-control is-invalid': 'form-control' }
                                 placeholder="Enter your name"
                                 name="name"
                                 id="name"
                                 value={name}
                                 onChange={this.changeHandler}
                             />
+                            {error.name && <div className="invalid-feedback">
+                                {error.name}
+                            </div>}
                         </div>
                         <div className="form-group">
                             <label htmlFor="email">Email: </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={error.email ? 'form-control is-invalid': 'form-control' }
                                 placeholder="Enter your email"
                                 name="email"
                                 id="email"
                                 value={email}
                                 onChange={this.changeHandler}
                             />
+                            {error.email && <div className="invalid-feedback">
+                                {error.email}
+                            </div>}
                         </div>
                         <div className="form-group">
                             <label htmlFor="password">Password: </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={error.password ? 'form-control is-invalid': 'form-control' }
                                 placeholder="Enter your password"
                                 name="password"
                                 id="password"
                                 value={password}
                                 onChange={this.changeHandler}
                             />
+                            {error.password && <div className="invalid-feedback">
+                                {error.password}
+                            </div>}
                         </div>
                         <div className="form-group">
                             <label htmlFor="confirmPassword">Confirm Password: </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={error.confirmPassword ? 'form-control is-invalid': 'form-control' }
                                 placeholder="Enter your confirmPassword"
                                 name="confirmPassword"
                                 id="confirmPassword"
                                 value={confirmPassword}
                                 onChange={this.changeHandler}
                             />
+                            {error.confirmPassword && <div className="invalid-feedback">
+                                {error.confirmPassword}
+                            </div>}
                         </div>
                         <Link to='/login'> Already have account? Login Here </Link>
                         <button className="btn btn-primary d-block my-2">Register</button>
@@ -83,4 +107,8 @@ class Register extends React.Component {
     }
 }
 
-export default Register
+const mapStateToProps = state => ({
+    auth: state.auth
+})
+
+export default connect(mapStateToProps, {register})(Register)
