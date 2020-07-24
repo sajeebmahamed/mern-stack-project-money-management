@@ -1,11 +1,22 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import {connect} from 'react-redux'
+import {login} from '../store/actions/authActions'
 
 class Login extends React.Component {
     state = {
         email: '',
         password: '',
         error: {}
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (JSON.stringify(nextProps.auth.error) !== JSON.stringify(prevState.error)) {
+            return {
+                error: nextProps.auth.error
+            }
+        }
+        return null
     }
 
     changeHandler = event => {
@@ -15,10 +26,15 @@ class Login extends React.Component {
     }
     submitHandler = event => {
         event.preventDefault();
+
+        this.props.login({
+            email: this.state.email,
+            password: this.state.password
+        }, this.props.history)
     }
 
     render() {
-        let {email, password} = this.state
+        let {email, password, error} = this.state
         return (
             <div className="row">
                 <div className="col-md-6 offset-md-3">
@@ -28,25 +44,31 @@ class Login extends React.Component {
                             <label htmlFor="email">Email: </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={error.email ? 'form-control is-invalid': 'form-control' }
                                 placeholder="Enter your email"
                                 name="email"
                                 id="email"
                                 value={email}
                                 onChange={this.changeHandler}
                             />
+                            {error.email && <div className="invalid-feedback">
+                                {error.email}
+                            </div>}
                         </div>
                         <div className="form-group">
                             <label htmlFor="password">Password: </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={error.password ? 'form-control is-invalid': 'form-control' }
                                 placeholder="Enter your password"
                                 name="password"
                                 id="password"
                                 value={password}
                                 onChange={this.changeHandler}
                             />
+                            {error.password && <div className="invalid-feedback">
+                                {error.password}
+                            </div>}
                         </div>
                         <Link to='/register'> Don't have account? Register Here </Link>
                         <button className="btn btn-primary d-block my-2">Login</button>
@@ -57,4 +79,7 @@ class Login extends React.Component {
     }
 }
 
-export default Login
+const mapStateToProps = state => ({
+    auth: state.auth
+})
+export default connect(mapStateToProps, {login})(Login)
